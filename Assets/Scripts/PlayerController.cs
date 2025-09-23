@@ -5,32 +5,40 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     public float sanity = 1f;
-    private float baseSpeed = 5f;
+    private float baseMoveSpeed = 5f;
+    private float baseJumpSpeed = 4f;
 
-    private Rigidbody2D rb;
-    private Vector2 movement;
+    private Rigidbody2D body;
     private float horizontalInput;
+    private bool isSpaceKeyDown;
 
     // Start is called before the first frame update
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
+        body = GetComponent<Rigidbody2D>();
         // Prevent the player from rotating
-        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        body.constraints = RigidbodyConstraints2D.FreezeRotation;
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Raw is suitable for 2d pixel game; w/o Raw it will be smooth
         horizontalInput = Input.GetAxisRaw("Horizontal");
-        movement = new Vector2(horizontalInput, 0);
+
+        isSpaceKeyDown = Input.GetKey(KeyCode.Space);
     }
 
     // Apply movement to the player in FixedUpdate for physics consistency
     void FixedUpdate()
     {
-        // rb.velocity = new Vector2(movement.x * speed, rb.velocity.y);
-        float currentSpeed = sanity * baseSpeed;
-        rb.velocity = new Vector2(horizontalInput * currentSpeed, rb.velocity.y);
+        float moveSpeed = sanity * baseMoveSpeed;
+        body.velocity = new Vector2(horizontalInput * moveSpeed, body.velocity.y);
+
+        if (isSpaceKeyDown)
+        {
+            float jumpSpeed = sanity * baseJumpSpeed;
+            body.velocity = new Vector2(body.velocity.x, jumpSpeed);
+        }
     }
 }
