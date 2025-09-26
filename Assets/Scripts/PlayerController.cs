@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Jump (velocity-based)")]
     [Tooltip("Target jump height in world units (independent of Rigidbody2D mass).")]
-    public float desiredJumpHeight = 2.5f;
+    public float desiredJumpHeight = 3f;
     public Transform groundCheck;           
     public float groundCheckRadius = 0.2f;  
     public LayerMask groundMask;            
