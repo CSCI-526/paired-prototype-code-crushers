@@ -31,7 +31,7 @@ public class PlatformSpawner : MonoBehaviour
 
     void Start()
     {
-        nextSpawnX = player.position.x + 2f; // start a bit ahead of player
+        nextSpawnX = player.position.x + 2f; 
         lastY = 0f;
 
         float g = Mathf.Abs(Physics2D.gravity.y * gravityScale);
@@ -56,7 +56,7 @@ public class PlatformSpawner : MonoBehaviour
         float gapX;
         if (!firstPlatformSpawned)
         {
-            // Force the first platform to be reachable, no overlap
+            
             gapX = 2f;
             firstPlatformSpawned = true;
         }
