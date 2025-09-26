@@ -1,44 +1,118 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
 public class PlayerController : MonoBehaviour
 {
-    public float sanity = 1f;
-    private float baseMoveSpeed = 5f;
-    private float baseJumpSpeed = 4f;
+    [Header("Sanity (0..1)")]
+    [Range(0f, 1f)] public float sanity = 1f;
+    [Range(0.2f, 1f)] public float minMoveMultiplier = 0.6f;
+    [Range(0.2f, 1f)] public float minJumpMultiplier = 0.6f;
 
-    private Rigidbody2D body;
-    private float horizontalInput;
-    private bool isSpaceKeyDown;
+    [Header("Movement")]
+    public float baseMoveSpeed = 5f;
 
-    // Start is called before the first frame update
-    void Start()
+    [Header("Jump (velocity-based)")]
+    [Tooltip("Target jump height in world units (independent of Rigidbody2D mass).")]
+    public float desiredJumpHeight = 2.5f;
+    public Transform groundCheck;           
+    public float groundCheckRadius = 0.2f;  
+    public LayerMask groundMask;            
+    public float coyoteTime = 0.10f;        
+
+    
+    Rigidbody2D rb;
+    Collider2D col;
+
+    
+    float h;
+    bool jumpQueued;
+    float coyoteCounter;
+
+    void Awake()
     {
-        body = GetComponent<Rigidbody2D>();
-        // Prevent the player from rotating
-        body.constraints = RigidbodyConstraints2D.FreezeRotation;
+        rb  = GetComponent<Rigidbody2D>();
+        col = GetComponent<Collider2D>();
+
+        
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        
+        if (groundMask.value == 0)
+        {
+            int g = LayerMask.NameToLayer("Ground");
+            if (g >= 0) groundMask = 1 << g;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        // Raw is suitable for 2d pixel game; w/o Raw it will be smooth
-        horizontalInput = Input.GetAxisRaw("Horizontal");
+    
+        h = Input.GetAxisRaw("Horizontal");
 
-        isSpaceKeyDown = Input.GetKey(KeyCode.Space);
+    
+        if (Input.GetButtonDown("Jump"))
+            jumpQueued = true;
+
+        sanity = Mathf.Clamp01(sanity);
     }
 
-    // Apply movement to the player in FixedUpdate for physics consistency
     void FixedUpdate()
     {
-        float moveSpeed = sanity * baseMoveSpeed;
-        body.velocity = new Vector2(horizontalInput * moveSpeed, body.velocity.y);
+    
+        float moveMult = Mathf.Lerp(minMoveMultiplier, 1f, sanity);
+        rb.velocity = new Vector2(h * (baseMoveSpeed * moveMult), rb.velocity.y);
 
-        if (isSpaceKeyDown)
+    
+        bool grounded = IsGrounded();
+        if (grounded) coyoteCounter = coyoteTime;
+        else          coyoteCounter -= Time.fixedDeltaTime;
+
+    
+        if (jumpQueued && coyoteCounter > 0f)
         {
-            float jumpSpeed = sanity * baseJumpSpeed;
-            body.velocity = new Vector2(body.velocity.x, jumpSpeed);
+            jumpQueued = false;
+            coyoteCounter = 0f;
+
+    
+            float g = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
+            float baseJumpSpeed = Mathf.Sqrt(2f * g * Mathf.Max(0.01f, desiredJumpHeight));
+
+            float jumpMult = Mathf.Lerp(minJumpMultiplier, 1f, sanity);
+
+            Vector2 v = rb.velocity;
+            v.y = baseJumpSpeed * jumpMult;  
+            rb.velocity = v;
+        }
+        else
+        {
+            
+            jumpQueued = false;
+        }
+    }
+
+    bool IsGrounded()
+    {
+        
+        if (groundCheck)
+        {
+            return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+        }
+
+        
+        Bounds b = col.bounds;
+        Vector2 boxSize = new Vector2(b.size.x * 0.95f, 0.1f);
+        float castDistance = 0.05f;
+        RaycastHit2D hit = Physics2D.BoxCast(b.center, boxSize, 0f, Vector2.down, castDistance, groundMask);
+        return hit.collider != null;
+    }
+
+    void OnDrawGizmosSelected()
+    {
+        if (groundCheck)
+        {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
         }
     }
 }
