@@ -9,7 +9,7 @@ public class SpikeStrip : MonoBehaviour
     public GameObject spikeUnitPrefab;   // prefab with SpriteRenderer using your red-triangle sprite
     public float unitWidth = 0.5f;       // world units per tooth
     public float unitHeight = 0.3f;      // world visual height for each tooth
-    public float seatSkin = 0.01f; 
+    public float seatSkin = 0.015f; 
 
     [Header("Sorting")]
     public int sortingOrderBoost = 10;
@@ -44,27 +44,27 @@ public class SpikeStrip : MonoBehaviour
         {
             float spriteW = sr.sprite.rect.width  / sr.sprite.pixelsPerUnit;
             float spriteH = sr.sprite.rect.height / sr.sprite.pixelsPerUnit;
-
             tooth.transform.localScale = new Vector3(
                 unitWidth  / Mathf.Max(0.0001f, spriteW),
                 unitHeight / Mathf.Max(0.0001f, spriteH),
                 1f
             );
 
-            // render above the platform
             int baseOrder = 0;
             var platSR = transform.parent ? transform.parent.GetComponent<SpriteRenderer>() : null;
             if (platSR) baseOrder = platSR.sortingOrder;
             sr.sortingOrder = baseOrder + sortingOrderBoost;
         }
 
-        // position so the triangle base sits on y=0 and points up
-        tooth.transform.localPosition = new Vector3(left + i * unitWidth,unitHeight * 0.5f - seatSkin,0f);
+        // Center the tooth: base sits at local y = 0
+        tooth.transform.localPosition = new Vector3(left + i * unitWidth,
+                                                    unitHeight * 0.5f,
+                                                    0f);
     }
 
-    // single trigger collider covering the strip
+    // Trigger centered on the strip volume (no extra seat here)
     trigger.size   = new Vector2(totalWidth, unitHeight);
-    trigger.offset = new Vector2(0f, unitHeight * 0.5f - seatSkin);
+    trigger.offset = new Vector2(0f, unitHeight * 0.5f);
 }
 
 }
