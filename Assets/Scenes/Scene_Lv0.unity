@@ -333,7 +333,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1965852165}
   platformPrefab: {fileID: 1439556532}
-  collectibleDiameterWorld: 0.65
   spawnAheadDistance: 25
   minWidth: 2
   maxWidth: 6
@@ -345,14 +344,20 @@ MonoBehaviour:
   gravityScale: 2.5
   spikesPrefab: {fileID: 0}
   collectiblePrefab: {fileID: 0}
-  overallDecorChance: 0.35
+  forceSpikeAfterEmptyMin: 4
+  forceSpikeAfterEmptyMax: 5
+  reRollForceAfterEachSpike: 1
+  baseDecorChance: 0.55
+  streakBoostPerEmpty: 0.1
+  spikeBoostPerEmpty: 0.08
+  minEmptyPlatformsBetweenDecor: 2
   spikeWeight: 0.55
   collectibleWeight: 0.45
-  minEmptyPlatformsBetweenDecor: 2
   spikeYOffset: 0.2
   spikeWidthFactor: 0.9
   collectibleYOffset: 0.6
   renderOrderBoost: 10
+  collectibleDiameterWorld: 0.65
 --- !u!4 &184779964
 Transform:
   m_ObjectHideFlags: 0
@@ -858,7 +863,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 35, y: 35, z: 1}
+  m_LocalScale: {x: 2000, y: 2000, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
