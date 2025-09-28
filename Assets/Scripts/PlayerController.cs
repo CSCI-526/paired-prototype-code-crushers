@@ -4,27 +4,26 @@ using UnityEngine;
 [RequireComponent(typeof(Collider2D))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Sanity (0..1)")]
-    [Range(0f, 1f)] public float sanity = 1f;
-    [Range(0.2f, 1f)] public float minMoveMultiplier = 0.6f;
-    [Range(0.2f, 1f)] public float minJumpMultiplier = 0.6f;
-
     [Header("Movement")]
     public float baseMoveSpeed = 5f;
 
     [Header("Jump (velocity-based)")]
     [Tooltip("Target jump height in world units (independent of Rigidbody2D mass).")]
     public float desiredJumpHeight = 3f;
-    public Transform groundCheck;           
-    public float groundCheckRadius = 0.2f;  
-    public LayerMask groundMask;            
-    public float coyoteTime = 0.10f;        
+    public Transform groundCheck;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundMask;
+    public float coyoteTime = 0.10f;
 
-    
+    [Header("(Optional) Multipliers without sanity system")]
+    [Tooltip("Scale movement speed (1 = normal).")]
+    public float moveMultiplier = 1f;
+    [Tooltip("Scale jump strength (1 = normal).")]
+    public float jumpMultiplier = 1f;
+
     Rigidbody2D rb;
     Collider2D col;
 
-    
     float h;
     bool jumpQueued;
     float coyoteCounter;
@@ -34,7 +33,6 @@ public class PlayerController : MonoBehaviour
         rb  = GetComponent<Rigidbody2D>();
         col = GetComponent<Collider2D>();
 
-        
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
 
         
@@ -47,59 +45,45 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
-    
         h = Input.GetAxisRaw("Horizontal");
-
-    
         if (Input.GetButtonDown("Jump"))
             jumpQueued = true;
-
-        sanity = Mathf.Clamp01(sanity);
     }
 
     void FixedUpdate()
     {
-    
-        float moveMult = Mathf.Lerp(minMoveMultiplier, 1f, sanity);
-        rb.velocity = new Vector2(h * (baseMoveSpeed * moveMult), rb.velocity.y);
+        
+        rb.velocity = new Vector2(h * (baseMoveSpeed * moveMultiplier), rb.velocity.y);
 
-    
+       
         bool grounded = IsGrounded();
         if (grounded) coyoteCounter = coyoteTime;
         else          coyoteCounter -= Time.fixedDeltaTime;
 
-    
+       
         if (jumpQueued && coyoteCounter > 0f)
         {
             jumpQueued = false;
             coyoteCounter = 0f;
 
-    
             float g = Mathf.Abs(Physics2D.gravity.y * rb.gravityScale);
             float baseJumpSpeed = Mathf.Sqrt(2f * g * Mathf.Max(0.01f, desiredJumpHeight));
 
-            float jumpMult = Mathf.Lerp(minJumpMultiplier, 1f, sanity);
-
-            Vector2 v = rb.velocity;
-            v.y = baseJumpSpeed * jumpMult;  
+            var v = rb.velocity;
+            v.y = baseJumpSpeed * Mathf.Max(0f, jumpMultiplier);
             rb.velocity = v;
         }
         else
         {
-            
             jumpQueued = false;
         }
     }
 
     bool IsGrounded()
     {
-        
         if (groundCheck)
-        {
             return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
-        }
 
-        
         Bounds b = col.bounds;
         Vector2 boxSize = new Vector2(b.size.x * 0.95f, 0.1f);
         float castDistance = 0.05f;

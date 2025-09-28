@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4530124599969254366}
   - component: {fileID: 2525071899401748063}
+  - component: {fileID: -55100273112569798}
   m_Layer: 0
   m_Name: SpikeTooth
   m_TagString: Untagged
@@ -84,3 +85,16 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
+--- !u!114 &-55100273112569798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4552491729545342224}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72a09fb13a60947708d65ebb27df3c85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 5
