@@ -5,11 +5,6 @@ using System;
 [RequireComponent(typeof(Collider2D))]
 public class PlayerController : MonoBehaviour
 {
-    [Header("Sanity (0..1)")]
-    [Range(0f, 1f)] public float sanity = 1f;
-    [Range(0.2f, 1f)] public float minMoveMultiplier = 0.6f;
-    [Range(0.2f, 1f)] public float minJumpMultiplier = 0.6f;
-
     [Header("Movement")]
     public float baseMoveSpeed = 5f;
 
