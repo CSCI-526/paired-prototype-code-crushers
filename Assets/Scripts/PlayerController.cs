@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
@@ -9,6 +10,8 @@ public class PlayerController : MonoBehaviour
     [Range(0f, 1f)] public float sanity = 1f;
     [Range(0.2f, 1f)] public float minMoveMultiplier = 0.6f;
     [Range(0.2f, 1f)] public float minJumpMultiplier = 0.6f;
+    [Range(0f, 1f)] public float sanityDangerThreshold = 0.6f;
+    [Range(0f, 0.1f)] public float sanityAutoLoss = 0.01f;
 
     [Header("Movement")]
     public float baseMoveSpeed = 5f;
@@ -20,6 +23,8 @@ public class PlayerController : MonoBehaviour
     public float groundCheckRadius = 0.2f;
     public LayerMask groundMask;
     public float coyoteTime = 0.10f;
+
+    private Coroutine sanityCoroutine;
 
     // ---- NEW: UI hook
     public event Action<float> OnSanityChanged;
@@ -40,6 +45,21 @@ public class PlayerController : MonoBehaviour
         {
             int g = LayerMask.NameToLayer("Ground");
             if (g >= 0) groundMask = 1 << g;
+        }
+
+        sanityCoroutine = StartCoroutine(ReduceSanityRoutine());
+    }
+
+    IEnumerator ReduceSanityRoutine()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+
+            if (sanity > 0f && sanity < sanityDangerThreshold && sanity < 1f)
+            {
+                ChangeSanity(-sanityAutoLoss);
+            }
         }
     }
 
