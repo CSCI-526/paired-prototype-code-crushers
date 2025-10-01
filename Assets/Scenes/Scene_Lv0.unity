@@ -398,7 +398,7 @@ Transform:
   m_GameObject: {fileID: 261476556}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.8, z: 0}
+  m_LocalPosition: {x: 0, y: -0.95, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1419,7 +1419,7 @@ Transform:
   m_GameObject: {fileID: 1839832778}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: -0.25, z: 0}
+  m_LocalPosition: {x: 0, y: -0.25, z: 0}
   m_LocalScale: {x: 0.22394352, y: 0.19262424, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1631,6 +1631,8 @@ MonoBehaviour:
   sanity: 1
   minMoveMultiplier: 0.6
   minJumpMultiplier: 0.6
+  sanityDangerThreshold: 0.6
+  sanityAutoLoss: 0.01
   baseMoveSpeed: 5
   desiredJumpHeight: 3
   groundCheck: {fileID: 261476557}
@@ -1730,6 +1732,14 @@ PrefabInstance:
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 4023105380181037878, guid: d28ac9551e2ce4d6bad9eb2057272029, type: 3}
+      propertyPath: m_Size.y
+      value: 1.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 4023105380181037878, guid: d28ac9551e2ce4d6bad9eb2057272029, type: 3}
+      propertyPath: m_Offset.y
+      value: -0.2
+      objectReference: {fileID: 0}
     - target: {fileID: 7099671921979380424, guid: d28ac9551e2ce4d6bad9eb2057272029, type: 3}
       propertyPath: m_Interpolate
       value: 1
@@ -1740,7 +1750,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7446719737577581927, guid: d28ac9551e2ce4d6bad9eb2057272029, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -8.57
+      value: -8.399
       objectReference: {fileID: 0}
     - target: {fileID: 7446719737577581927, guid: d28ac9551e2ce4d6bad9eb2057272029, type: 3}
       propertyPath: m_LocalPosition.y
