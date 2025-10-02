@@ -5,6 +5,8 @@ public class CollectiblePickup : MonoBehaviour
 {
     [Tooltip("Heal amount in sanity units (0..1). 0.10 = 10%")]
     public float healAmount = 0.10f;
+    public GameObject onCollectEffect;
+
 
     void Awake()
     {
@@ -19,6 +21,9 @@ public class CollectiblePickup : MonoBehaviour
 
         pc.ChangeSanity(healAmount);
         Destroy(gameObject);
+        Instantiate(onCollectEffect, transform.position, transform.rotation);
+
+        
     }
 }
 

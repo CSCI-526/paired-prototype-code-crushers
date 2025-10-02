@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4316779068768628128}
   - component: {fileID: 1340000963616028291}
-  - component: {fileID: 4747905199391808142}
+  - component: {fileID: 3222866371120815517}
   m_Layer: 0
   m_Name: Collectible
   m_TagString: Untagged
@@ -69,7 +69,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
---- !u!114 &4747905199391808142
+--- !u!114 &3222866371120815517
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -82,6 +82,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   healAmount: 0.1
+  onCollectEffect: {fileID: 3568347110775219160, guid: fb47d0fa55373436cbb52c4df9f3dc82, type: 3}
 --- !u!1 &7978716992633883246
 GameObject:
   m_ObjectHideFlags: 0
@@ -92,7 +93,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1512309777362900008}
   - component: {fileID: 6940622648220757592}
-  - component: {fileID: 8780105679167818015}
   m_Layer: 0
   m_Name: Circle
   m_TagString: Untagged
@@ -167,38 +167,3 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 1
   m_SpriteSortPoint: 0
---- !u!58 &8780105679167818015
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7978716992633883246}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 1
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.5

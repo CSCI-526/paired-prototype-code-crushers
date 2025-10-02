@@ -108,5 +108,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7e092ede58ed8466fafbd40860ae44da, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  damagePerTick: 0.1
-  tickInterval: 0.45
+  damage: 0.1
+  onCollectEffect: {fileID: 3568347110775219160, guid: 7cb4510af2cc84ad8b0f1ae6c8021e0b, type: 3}

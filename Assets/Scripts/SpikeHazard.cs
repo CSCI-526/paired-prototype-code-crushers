@@ -9,6 +9,9 @@ public class SpikeHazard : MonoBehaviour
 
     private HashSet<PlayerController> touched = new HashSet<PlayerController>();
 
+    public GameObject onCollectEffect;
+
+
     void Awake()
     {
         var box = GetComponent<BoxCollider2D>();
@@ -23,6 +26,8 @@ public class SpikeHazard : MonoBehaviour
         // first time entering this spike strip during this contact
         if (touched.Add(pc))
             pc.ChangeSanity(-damage);
+            Instantiate(onCollectEffect, transform.position, transform.rotation);
+
     }
 
     void OnTriggerExit2D(Collider2D other)
