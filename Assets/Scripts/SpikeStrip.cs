@@ -4,9 +4,9 @@ using UnityEngine;
 public class SpikeStrip : MonoBehaviour
 {
     [Header("Visual tooth (triangle)")]
-    public GameObject spikeUnitPrefab;   // prefab with SpriteRenderer using your red-triangle sprite
-    public float unitWidth = 0.5f;       // world units per tooth
-    public float unitHeight = 0.3f;      // world visual height for each tooth
+    public GameObject spikeUnitPrefab;   
+    public float unitWidth = 0.5f;       
+    public float unitHeight = 0.3f;      
     public float seatSkin = 0.015f; 
 
     [Header("Sorting")]
@@ -20,10 +20,10 @@ public class SpikeStrip : MonoBehaviour
         trigger.isTrigger = true;
     }
 
-    /// Build/refresh the strip to match targetWidth (world units)
+    
     public void Build(float targetWidth)
 {
-    // delete old teeth (keep just this parent and its collider)
+   
     for (int i = transform.childCount - 1; i >= 0; i--)
         Destroy(transform.GetChild(i).gameObject);
 
@@ -31,7 +31,7 @@ public class SpikeStrip : MonoBehaviour
     float totalWidth = count * unitWidth;
     float left = -totalWidth * 0.5f + unitWidth * 0.5f;
 
-    // parent is already scale-neutralized in PositionSpikes, so 1 local unit = 1 world unit
+   
     for (int i = 0; i < count; i++)
     {
         var tooth = Instantiate(spikeUnitPrefab, transform);
@@ -54,13 +54,13 @@ public class SpikeStrip : MonoBehaviour
             sr.sortingOrder = baseOrder + sortingOrderBoost;
         }
 
-        // Center the tooth: base sits at local y = 0
+        
         tooth.transform.localPosition = new Vector3(left + i * unitWidth,
                                                     unitHeight * 0.5f,
                                                     0f);
     }
 
-    // Trigger centered on the strip volume (no extra seat here)
+   
     trigger.size   = new Vector2(totalWidth, unitHeight);
     trigger.offset = new Vector2(0f, unitHeight * 0.5f);
 }

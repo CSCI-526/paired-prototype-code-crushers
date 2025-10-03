@@ -33,7 +33,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundMask;
     public float coyoteTime = 0.10f;
 
-    // ---- UI hook
+   
     public event Action<float> OnSanityChanged;
 
     Rigidbody2D rb;
@@ -42,11 +42,10 @@ public class PlayerController : MonoBehaviour
     bool jumpQueued;
     float coyoteCounter;
 
-    // ---- Idle-on-same-platform tracking
     float idleTimer;
-    Collider2D currentGround;     // ground collider we are standing on now
-    Collider2D lastGround;        // last ground collider (for "same platform" check)
-    bool drainingIdle;            // are we currently draining due to idle?
+    Collider2D currentGround;     
+    Collider2D lastGround;        
+    bool drainingIdle;            
     Coroutine idleDrainCo;
 
     void Awake()
@@ -67,21 +66,21 @@ public class PlayerController : MonoBehaviour
         h = Input.GetAxisRaw("Horizontal");
         if (Input.GetButtonDown("Jump")) jumpQueued = true;
 
-        sanity = Mathf.Clamp01(sanity); // keep clamped
+        sanity = Mathf.Clamp01(sanity); 
     }
 
     void FixedUpdate()
     {
-        // --- Move
+        
         float moveMult = Mathf.Lerp(minMoveMultiplier, 1f, sanity);
         rb.velocity = new Vector2(h * (baseMoveSpeed * moveMult), rb.velocity.y);
 
-        // --- Grounded & coyote time
+       
         bool grounded = IsGrounded(out currentGround);
         if (grounded) coyoteCounter = coyoteTime;
         else          coyoteCounter -= Time.fixedDeltaTime;
 
-        // --- Jump
+        
         if (jumpQueued && coyoteCounter > 0f)
         {
             jumpQueued = false;
@@ -100,18 +99,18 @@ public class PlayerController : MonoBehaviour
             jumpQueued = false;
         }
 
-        // --- Idle-on-same-platform detector
+        
         bool veryStill = Mathf.Abs(rb.velocity.x) <= idleMoveSpeedEpsilon;
         bool samePlatform = (currentGround != null && currentGround == lastGround);
 
         if (grounded && veryStill)
         {
-            // if we just stepped onto a different platform, reset the timer
+           
             if (!samePlatform) idleTimer = 0f;
 
             idleTimer += Time.fixedDeltaTime;
 
-            // start draining if we crossed the threshold
+            
             if (idleTimer >= idleDrainDelay && !drainingIdle)
             {
                 drainingIdle = true;
@@ -120,16 +119,16 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            // moving or airborne -> stop drain & reset timer
+            
             idleTimer = 0f;
             StopIdleDrainIfAny();
         }
 
-        // remember platform for next frame
+        
         lastGround = grounded ? currentGround : null;
     }
 
-    // returns grounded + the ground collider we stand on
+    
     bool IsGrounded(out Collider2D ground)
     {
         ground = null;
@@ -168,7 +167,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // ---- public API to change sanity
+    
     public void ChangeSanity(float delta)
     {
         float before = sanity;

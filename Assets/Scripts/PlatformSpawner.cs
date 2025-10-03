@@ -22,12 +22,12 @@ public class PlatformSpawner : MonoBehaviour
     public float maxY = 3f;
 
     [Header("Player Jump Sync")]
-    public float desiredJumpHeight = 2.5f;  // match PlayerController
+    public float desiredJumpHeight = 2.5f;  
     public float gravityScale = 2.5f;
 
     [Header("Decor Prefabs (auto-loaded from Resources/Prefabs)")]
-    public GameObject spikesPrefab;        // Assets/Resources/Prefabs/Spikes.prefab
-    public GameObject collectiblePrefab;   // Assets/Resources/Prefabs/Collectible.prefab
+    public GameObject spikesPrefab;        
+    public GameObject collectiblePrefab;   
 
     [Header("Decor Frequency (new)")]
     [Tooltip("Force a SPIKE after this many empty platforms (inclusive).")]
@@ -45,46 +45,45 @@ public class PlatformSpawner : MonoBehaviour
     [SerializeField, Range(0f,1f)] float spikeBoostPerEmpty = 0.08f;
 
     [Tooltip("Minimum number of empty platforms required between any decorations.")]
-    public int minEmptyPlatformsBetweenDecor = 0; // allow back-to-back when rolls/force hit
+    public int minEmptyPlatformsBetweenDecor = 0; 
 
     [Header("Decor Mix")]
-    [Range(0f,1f)] public float spikeWeight = 0.6f;       // relative weight vs collectible
-    [Range(0f,1f)] public float collectibleWeight = 0.4f; // should sum ~1.0
+    [Range(0f,1f)] public float spikeWeight = 0.6f;      
+    [Range(0f,1f)] public float collectibleWeight = 0.4f; 
 
     [Header("Decor Placement")]
     [Tooltip("Spikes sit on platform top; keep this 0 unless you want a gap.")]
-    public float spikeYOffset = 0f;           // keep at 0 to sit flush
-    public float spikeWidthFactor = 0.90f;    // spikes cover this fraction of platform width
-    public float collectibleYOffset = 0.60f;  // how high above platform top to place orb
-    public int renderOrderBoost = 10;         // draws decor above platform
+    public float spikeYOffset = 0f;           
+    public float spikeWidthFactor = 0.90f;    
+    public float collectibleYOffset = 0.60f;  
+    public int renderOrderBoost = 10;         
 
     [Header("Collectible Size (world units)")]
     [SerializeField, Tooltip("Circle diameter in WORLD units (independent of parent/platform scale)")]
-    float collectibleDiameterWorld = 0.70f;   // tweak 0.65–0.9 to taste
+    float collectibleDiameterWorld = 0.70f;   
 
-    // --- internals ---
+    
     private float nextSpawnX;
     private float lastY;
     private float maxStepY;
     private bool firstPlatformSpawned = false;
 
-    // frequency state
-    int emptyStreak = 0;         // empties since any decor
-    int emptiesSinceSpike = 0;   // empties since a SPIKE
-    int currentForceThreshold;   // randomized 4–5 so pattern isn't robotic
+    
+    int emptyStreak = 0;         
+    int emptiesSinceSpike = 0;   
+    int currentForceThreshold;   
 
     void Start()
     {
         nextSpawnX = player.position.x + 2f; 
         lastY = 0f;
 
-        // Compute jump reach (vertical step bound)
         float g = Mathf.Abs(Physics2D.gravity.y * gravityScale);
         float jumpVel = Mathf.Sqrt(2f * g * Mathf.Max(0.01f, desiredJumpHeight));
-        float airtime = (2f * jumpVel) / g; // not used directly here but kept for clarity
+        float airtime = (2f * jumpVel) / g; 
         maxStepY = desiredJumpHeight * 0.9f;
 
-        // Auto-load prefabs from Resources if not assigned
+        
         if (spikesPrefab == null)
         {
             spikesPrefab = Resources.Load<GameObject>("Prefabs/Spikes");
@@ -96,7 +95,7 @@ public class PlatformSpawner : MonoBehaviour
             if (collectiblePrefab == null) Debug.LogWarning("[Spawner] Missing Resources/Prefabs/Collectible.prefab");
         }
 
-        // Initialize the force-spike threshold (4–5 by default)
+       
         currentForceThreshold = Random.Range(forceSpikeAfterEmptyMin, forceSpikeAfterEmptyMax + 1);
     }
 
@@ -115,7 +114,7 @@ public class PlatformSpawner : MonoBehaviour
         float gapX = (!firstPlatformSpawned) ? 2f : Random.Range(minGapX, maxGapX);
         firstPlatformSpawned = true;
 
-        // Vertical step within jump reach
+        
         float stepY = Random.Range(-maxStepY, maxStepY);
         lastY = Mathf.Clamp(lastY + stepY, minY, maxY);
 
@@ -124,12 +123,12 @@ public class PlatformSpawner : MonoBehaviour
 
         GameObject platform = Instantiate(platformPrefab, pos, Quaternion.identity);
 
-        // scale platform width (assumes your prefab scales X for length)
+        
         Vector3 s = platform.transform.localScale;
         s.x = width;
         platform.transform.localScale = s;
 
-        // maybe add spikes or collectible
+        
         MaybeDecorate(platform);
 
         nextSpawnX = xPos + (width / 2f);
@@ -137,7 +136,7 @@ public class PlatformSpawner : MonoBehaviour
 
     void MaybeDecorate(GameObject platform)
     {
-        // Enforce global spacing rule if desired
+       
         if (emptyStreak < minEmptyPlatformsBetweenDecor)
         {
             emptyStreak++;
@@ -147,13 +146,13 @@ public class PlatformSpawner : MonoBehaviour
 
         Bounds b = GetWorldBounds(platform);
 
-        // 1) Force a SPIKE after N empties
+        
         if (emptiesSinceSpike >= currentForceThreshold && spikesPrefab != null)
         {
             var spikes = Instantiate(spikesPrefab, platform.transform);
             PositionSpikes(spikes, b);
 
-            // reset streaks & optionally re-roll next threshold
+            
             emptyStreak = 0;
             emptiesSinceSpike = 0;
             if (reRollForceAfterEachSpike)
@@ -161,13 +160,13 @@ public class PlatformSpawner : MonoBehaviour
             return;
         }
 
-        // 2) Otherwise: roll with boosted chance based on streaks
+        
         float boost = streakBoostPerEmpty * emptyStreak + spikeBoostPerEmpty * emptiesSinceSpike;
         float chance = Mathf.Clamp01(baseDecorChance + boost);
 
         if (Random.value <= chance)
         {
-            // decide spikes vs collectible by weight
+            
             float total = Mathf.Max(0.0001f, spikeWeight + collectibleWeight);
             float roll = Random.value * total;
 
@@ -175,39 +174,39 @@ public class PlatformSpawner : MonoBehaviour
             {
                 var spikes = Instantiate(spikesPrefab, platform.transform);
                 PositionSpikes(spikes, b);
-                emptiesSinceSpike = 0; // a spike happened
+                emptiesSinceSpike = 0; 
             }
             else if (collectiblePrefab != null)
             {
                 var c = Instantiate(collectiblePrefab, platform.transform);
                 PositionCollectible(c, b);
-                // collectible does not reset the spike counter so a forced spike can still happen soon
+                
                 emptiesSinceSpike++;
             }
             else
             {
-                // nothing available -> treat as empty
+                
                 emptyStreak++;
                 emptiesSinceSpike++;
                 return;
             }
 
-            // placed something → reset emptyStreak (for "any decor")
+            
             emptyStreak = 0;
         }
         else
         {
-            // stayed empty
+            
             emptyStreak++;
             emptiesSinceSpike++;
         }
     }
 
-    // ---- Placement helpers ----
+   
 
     void PositionSpikes(GameObject spikesGO, Bounds pb)
 {
-    // Neutralize parent (platform) scale so children aren't stretched
+    
     var parent = spikesGO.transform.parent;
     if (parent != null)
     {
@@ -219,9 +218,9 @@ public class PlatformSpawner : MonoBehaviour
         );
     }
 
-    // Seat the spikes slightly INTO the platform so no seam ever shows
+    
     var strip = spikesGO.GetComponent<SpikeStrip>();
-    float seat = (strip != null) ? strip.seatSkin : 0.015f;  // fallback if null
+    float seat = (strip != null) ? strip.seatSkin : 0.015f;  
     spikesGO.transform.position = new Vector3(pb.center.x, pb.max.y - seat, 0f);
 
     if (strip != null)
@@ -242,7 +241,7 @@ public class PlatformSpawner : MonoBehaviour
         float y = pb.max.y + collectibleYOffset;
         c.transform.position = new Vector3(x, y, 0f);
 
-        // Force a fixed WORLD diameter (independent of parent/platform scale)
+        
         var sr = c.GetComponent<SpriteRenderer>();
         if (sr != null && sr.sprite != null)
         {
@@ -261,7 +260,7 @@ public class PlatformSpawner : MonoBehaviour
         }
         else
         {
-            // fallback if no sprite: use diameter as world scale
+            
             float s = collectibleDiameterWorld;
             Vector3 parentLossy = c.transform.parent ? c.transform.parent.lossyScale : Vector3.one;
             c.transform.localScale = new Vector3(
@@ -271,13 +270,13 @@ public class PlatformSpawner : MonoBehaviour
             );
         }
 
-        // draw above platform
+        
         var platSR = c.transform.parent.GetComponent<SpriteRenderer>();
         var cs = c.GetComponent<SpriteRenderer>();
         if (cs && platSR) cs.sortingOrder = platSR.sortingOrder + renderOrderBoost;
     }
 
-    // ---- Utility ----
+    
 
     Bounds GetWorldBounds(GameObject go)
     {
@@ -293,7 +292,7 @@ public class PlatformSpawner : MonoBehaviour
         var childSR = go.GetComponentInChildren<SpriteRenderer>();
         if (childSR) return childSR.bounds;
 
-        // fallback
+        
         return new Bounds(go.transform.position, new Vector3(1f, 0.25f, 0f));
     }
 }

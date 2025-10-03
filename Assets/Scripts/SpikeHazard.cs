@@ -23,7 +23,7 @@ public class SpikeHazard : MonoBehaviour
         var pc = other.GetComponentInParent<PlayerController>();
         if (!pc) return;
 
-        // first time entering this spike strip during this contact
+        
         if (touched.Add(pc))
             pc.ChangeSanity(-damage);
             Instantiate(onCollectEffect, transform.position, transform.rotation);
