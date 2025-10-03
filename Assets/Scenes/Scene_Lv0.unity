@@ -1899,8 +1899,10 @@ MonoBehaviour:
   sanity: 1
   minMoveMultiplier: 0.6
   minJumpMultiplier: 0.6
-  sanityDangerThreshold: 0.6
   sanityAutoLoss: 0.01
+  idleDrainDelay: 10
+  idleDrainInterval: 1
+  idleMoveSpeedEpsilon: 0.05
   baseMoveSpeed: 5
   desiredJumpHeight: 3
   groundCheck: {fileID: 261476557}

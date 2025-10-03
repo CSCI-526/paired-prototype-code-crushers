@@ -16,7 +16,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("Idle Drain Rules")]
     [Tooltip("How long the player must be idle on the SAME platform before drain starts.")]
-    public float idleDrainDelay = 60f;
+    public float idleDrainDelay = 10f;
     [Tooltip("Sanity drain tick interval once idle drain has started.")]
     public float idleDrainInterval = 1f;
     [Tooltip("Considered 'not moving' if |horizontal velocity| <= this.")]
