@@ -10,8 +10,17 @@ public class PlayerController : MonoBehaviour
     [Range(0f, 1f)] public float sanity = 1f;
     [Range(0.2f, 1f)] public float minMoveMultiplier = 0.6f;
     [Range(0.2f, 1f)] public float minJumpMultiplier = 0.6f;
-    [Range(0f, 1f)] public float sanityDangerThreshold = 0.6f;
+
+    [Tooltip("How much sanity to lose per tick while idling on the same platform.")]
     [Range(0f, 0.1f)] public float sanityAutoLoss = 0.01f;
+
+    [Header("Idle Drain Rules")]
+    [Tooltip("How long the player must be idle on the SAME platform before drain starts.")]
+    public float idleDrainDelay = 60f;
+    [Tooltip("Sanity drain tick interval once idle drain has started.")]
+    public float idleDrainInterval = 1f;
+    [Tooltip("Considered 'not moving' if |horizontal velocity| <= this.")]
+    public float idleMoveSpeedEpsilon = 0.05f;
 
     [Header("Movement")]
     public float baseMoveSpeed = 5f;
@@ -24,9 +33,7 @@ public class PlayerController : MonoBehaviour
     public LayerMask groundMask;
     public float coyoteTime = 0.10f;
 
-    private Coroutine sanityCoroutine;
-
-    // ---- NEW: UI hook
+    // ---- UI hook
     public event Action<float> OnSanityChanged;
 
     Rigidbody2D rb;
@@ -34,6 +41,13 @@ public class PlayerController : MonoBehaviour
     float h;
     bool jumpQueued;
     float coyoteCounter;
+
+    // ---- Idle-on-same-platform tracking
+    float idleTimer;
+    Collider2D currentGround;     // ground collider we are standing on now
+    Collider2D lastGround;        // last ground collider (for "same platform" check)
+    bool drainingIdle;            // are we currently draining due to idle?
+    Coroutine idleDrainCo;
 
     void Awake()
     {
@@ -46,39 +60,28 @@ public class PlayerController : MonoBehaviour
             int g = LayerMask.NameToLayer("Ground");
             if (g >= 0) groundMask = 1 << g;
         }
-
-        sanityCoroutine = StartCoroutine(ReduceSanityRoutine());
-    }
-
-    IEnumerator ReduceSanityRoutine()
-    {
-        while (true)
-        {
-            yield return new WaitForSeconds(1f);
-
-            if (sanity > 0f && sanity < sanityDangerThreshold && sanity < 1f)
-            {
-                ChangeSanity(-sanityAutoLoss);
-            }
-        }
     }
 
     void Update()
     {
         h = Input.GetAxisRaw("Horizontal");
         if (Input.GetButtonDown("Jump")) jumpQueued = true;
+
         sanity = Mathf.Clamp01(sanity); // keep clamped
     }
 
     void FixedUpdate()
     {
+        // --- Move
         float moveMult = Mathf.Lerp(minMoveMultiplier, 1f, sanity);
         rb.velocity = new Vector2(h * (baseMoveSpeed * moveMult), rb.velocity.y);
 
-        bool grounded = IsGrounded();
+        // --- Grounded & coyote time
+        bool grounded = IsGrounded(out currentGround);
         if (grounded) coyoteCounter = coyoteTime;
         else          coyoteCounter -= Time.fixedDeltaTime;
 
+        // --- Jump
         if (jumpQueued && coyoteCounter > 0f)
         {
             jumpQueued = false;
@@ -96,21 +99,76 @@ public class PlayerController : MonoBehaviour
         {
             jumpQueued = false;
         }
+
+        // --- Idle-on-same-platform detector
+        bool veryStill = Mathf.Abs(rb.velocity.x) <= idleMoveSpeedEpsilon;
+        bool samePlatform = (currentGround != null && currentGround == lastGround);
+
+        if (grounded && veryStill)
+        {
+            // if we just stepped onto a different platform, reset the timer
+            if (!samePlatform) idleTimer = 0f;
+
+            idleTimer += Time.fixedDeltaTime;
+
+            // start draining if we crossed the threshold
+            if (idleTimer >= idleDrainDelay && !drainingIdle)
+            {
+                drainingIdle = true;
+                idleDrainCo = StartCoroutine(IdleDrainRoutine());
+            }
+        }
+        else
+        {
+            // moving or airborne -> stop drain & reset timer
+            idleTimer = 0f;
+            StopIdleDrainIfAny();
+        }
+
+        // remember platform for next frame
+        lastGround = grounded ? currentGround : null;
     }
 
-    bool IsGrounded()
+    // returns grounded + the ground collider we stand on
+    bool IsGrounded(out Collider2D ground)
     {
+        ground = null;
+
         if (groundCheck)
-            return Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+        {
+            var hit = Physics2D.OverlapCircle(groundCheck.position, groundCheckRadius, groundMask);
+            ground = hit;
+            return hit != null;
+        }
 
         Bounds b = col.bounds;
         Vector2 boxSize = new Vector2(b.size.x * 0.95f, 0.1f);
         float castDistance = 0.05f;
-        RaycastHit2D hit = Physics2D.BoxCast(b.center, boxSize, 0f, Vector2.down, castDistance, groundMask);
-        return hit.collider != null;
+        RaycastHit2D hit2 = Physics2D.BoxCast(b.center, boxSize, 0f, Vector2.down, castDistance, groundMask);
+        ground = hit2.collider;
+        return hit2.collider != null;
     }
 
-    // ---- NEW: public API to change sanity
+    IEnumerator IdleDrainRoutine()
+    {
+        while (drainingIdle)
+        {
+            ChangeSanity(-sanityAutoLoss);
+            yield return new WaitForSeconds(idleDrainInterval);
+        }
+    }
+
+    void StopIdleDrainIfAny()
+    {
+        if (drainingIdle)
+        {
+            drainingIdle = false;
+            if (idleDrainCo != null) StopCoroutine(idleDrainCo);
+            idleDrainCo = null;
+        }
+    }
+
+    // ---- public API to change sanity
     public void ChangeSanity(float delta)
     {
         float before = sanity;
